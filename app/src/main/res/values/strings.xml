@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Inmobiliaria</string>
+    <string name="Borrar">Modificar</string>
+    <string name="Foto">Hacer Foto</string>
+    <string name="Modificar">Modificar</string>
+    <string name="agregar">Añadir</string>
+    <string name="ordenaT">Ordendar por tipos</string>
+    <string name="ordenaP">Ordendar por precios</string>
+    <string name="atras">anterior</string>
+    <string name="siguiente">siguiente</string>
+    <string name="detalleInmbueble">Detalle inmbueble</string>
+</resources>

@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/contextual"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".Main"
+    >
+    <item android:id="@+id/borrar"
+        android:title="Borrar"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+    <item android:id="@+id/editar"
+        android:title="Modificar"
+        />
+    <item android:id="@+id/foto"
+        android:title="Hacer Foto"
+        />
+</menu>

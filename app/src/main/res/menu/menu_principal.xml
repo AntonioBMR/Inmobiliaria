@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".principal">
+    <item android:id="@+id/anadir" android:title="Añadir"
+        android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/ordenaP" android:title="Ordenar por Precio"
+        android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/ordenaT" android:title="Ordenar por Tipo"
+        android:orderInCategory="100" android:showAsAction="never" />
+</menu>

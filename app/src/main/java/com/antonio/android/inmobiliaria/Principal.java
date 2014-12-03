@@ -267,7 +267,7 @@ public class Principal extends Activity {
         });
         dialogo1.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogo1, int id) {
-                finish();
+                dialogo1.cancel();
             }
         });
         dialogo1.show();

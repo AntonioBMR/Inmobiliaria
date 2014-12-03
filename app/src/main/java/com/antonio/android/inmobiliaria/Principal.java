@@ -166,13 +166,9 @@ public class Principal extends Activity {
         registerForContextMenu(lv);
 
     }
-
     private boolean editar(final int index) {
-
-        //cargamos jugador
         Inmueble i=new Inmueble();
         i=inmuebles.get(index);
-        //cargamos vista
         LayoutInflater inflater = LayoutInflater.from(this);
         final View vista = inflater.inflate(R.layout.dialogo, null);
         final EditText et1, et2,et3;
@@ -183,13 +179,9 @@ public class Principal extends Activity {
         et1 = (EditText) vista.findViewById(R.id.etDA);
         et2 = (EditText) vista.findViewById(R.id.etTA);
         et3 = (EditText) vista.findViewById(R.id.etPA);
-
         et1.setText(dir);
         et2.setText(tip);
         et3.setText(pr);
-
-
-        //dialogo
         final AlertDialog d = new AlertDialog.Builder(this)
                 .setView(vista)
                 .setTitle("Modificar inmueble")
@@ -247,7 +239,7 @@ public class Principal extends Activity {
         lv.setAdapter(ad);
         return true;
     }
-
+//
     public boolean borrar(final int pos){
         AlertDialog.Builder dialogo1 = new AlertDialog.Builder(Principal.this);
         dialogo1.setTitle("Importante");

@@ -28,7 +28,6 @@ public class Adaptador extends ArrayAdapter<Inmueble> {
     public View getView(int position, View v,ViewGroup vg){
         if(v==null){
             v=i.inflate(resource,null);
-
         }
         TextView tvD=(TextView) v.findViewById(R.id.textViewD);
         TextView tvT=(TextView) v.findViewById(R.id.textViewT);

@@ -27,7 +27,6 @@ public class Ayudante  extends SQLiteOpenHelper {
                 Contrato.TablaInmuebles.PRECIO+" text)";
         db.execSQL(sql);
     }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 

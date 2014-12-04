@@ -293,8 +293,6 @@ public class Principal extends Activity {
 
                     @Override
                     public void onClick(View view) {
-                        //filtros
-
                         if(et1.getText().toString().length() > 0
                                 && et3.getText().length() > 0&& et2.getText().length()>0) {
                             Double pr = 0.0;
@@ -421,6 +419,7 @@ public class Principal extends Activity {
 
         }
     }
+
     private boolean hacerFoto(final int index){
         Calendar cal = new GregorianCalendar();
         Date date = cal.getTime();

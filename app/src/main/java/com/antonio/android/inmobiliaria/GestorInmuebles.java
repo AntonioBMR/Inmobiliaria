@@ -39,7 +39,6 @@ public class GestorInmuebles {
         long id = bd.insert(Contrato.TablaInmuebles.TABLA, null, valores);
         return id;
     }
-
     public int delete(Inmueble i) {
         String condicion = Contrato.TablaInmuebles._ID + " = ?";
         String[] argumentos = { i.getId() + "" };
@@ -47,8 +46,6 @@ public class GestorInmuebles {
                 Contrato.TablaInmuebles.TABLA, condicion, argumentos);
         return cuenta;
     }
-
-
     public int update(Inmueble i) {
         ContentValues valores = new ContentValues();
         valores.put(Contrato.TablaInmuebles.DIRECCION, i.getDireccion());

@@ -38,7 +38,7 @@ public class Principal extends Activity {
     private Cursor cursor;
     private final int ACTIVIDAD2=1;
     private ListView lv;
-    int imgActual;
+    private int imgActual;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class Secundaria extends Activity {
     private ArrayList<File> fotos;
-    int imgActual;
+    private int imgActual;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

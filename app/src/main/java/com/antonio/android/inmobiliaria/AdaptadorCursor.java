@@ -36,7 +36,7 @@ public class AdaptadorCursor extends CursorAdapter {
         tvL.setText(in.getLocalidad());
         tvD.setText(in.getDireccion());
         tvT.setText(in.getTipo());
-        tvP.setText(in.getPrecio()+" ");
+        tvP.setText(in.getPrecio()+"€");
     }
     public static Inmueble getRow(Cursor c) {
         Inmueble in = new Inmueble();

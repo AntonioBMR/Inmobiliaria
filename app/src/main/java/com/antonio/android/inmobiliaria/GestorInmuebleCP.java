@@ -29,6 +29,7 @@ public class GestorInmuebleCP {
         Cursor cursor = cr.query(uri, null, null, null, Contrato.TablaInmuebles.PRECIO);
         return cursor;
     }
+
     public void insertar (Inmueble in){
         Uri uri=Contrato.TablaInmuebles.CONTENT_URI;
         ContentValues valores = new ContentValues();

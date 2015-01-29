@@ -25,11 +25,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -157,8 +157,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         lv.setAdapter(ac);
         loader.onContentChanged();
     }
-
-
 
     /*************                                                         ************************//////
     /************************************METODOS CRUD INTERFACE***********************************//////
@@ -450,7 +448,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             alert.show();
         }
         if (id == R.id.ordenaP) {
-            Cursor cursor=gi.getCursor();
+            Cursor cursor=gi.getCursorPre();
             //Collections.sort(inmuebles, new OrdenaPrecios());
             ac = new AdaptadorCursor(Principal.this,cursor);
             ListView lv = (ListView) findViewById(R.id.listView);
@@ -459,8 +457,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             return true;
         }
         if (id == R.id.ordenaT) {
-            Collections.sort(inmuebles, new OrdenaTipos());
-            ac = new AdaptadorCursor(Principal.this, null);
+            Cursor cursor=gi.getCursorPre();
+           // Collections.sort(inmuebles, new OrdenaTipos());
+            ac = new AdaptadorCursor(Principal.this, cursor);
             ListView lv = (ListView) findViewById(R.id.listView);
             lv.setAdapter(ac);
             loader.onContentChanged();
@@ -535,6 +534,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         startActivityForResult(cameraIntent, ACTIVIDAD2);
         return true;
     }
+
     public void borraFotos(final int id){
         String ruta = Environment.getExternalStorageDirectory() +"/fotosInmobiliaria/";
         File carpeta = new  File(ruta);

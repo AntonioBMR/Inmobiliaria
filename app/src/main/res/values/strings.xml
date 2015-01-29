@@ -5,7 +5,7 @@
     <string name="direccion">direccion</string>
     <string name="tipo">tipo</string>
     <string name="precio">precio</string>
-    <string name="Borrar">Modificar</string>
+    <string name="Borrar">Borrar</string>
     <string name="Foto">Hacer Foto</string>
     <string name="opciones">opciones</string>
     <string name="BFoto">Borrar Foto</string>

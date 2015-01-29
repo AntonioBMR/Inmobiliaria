@@ -18,16 +18,13 @@ public class Proveedor extends ContentProvider {
     private static final UriMatcher convierteUri2Int;
     private static final int INMUEBLES = 1, INMUEBLE_ID = 2;
 
-
     static {
         convierteUri2Int = new UriMatcher(UriMatcher.NO_MATCH);
         convierteUri2Int.addURI(AUTORIDAD,Contrato.TablaInmuebles.TABLA, INMUEBLES);
         convierteUri2Int.addURI(AUTORIDAD,Contrato.TablaInmuebles.TABLA+ "/#", INMUEBLE_ID);
     }
-
     public Proveedor() {
     }
-
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db= abd.getWritableDatabase();
@@ -84,10 +81,6 @@ public class Proveedor extends ContentProvider {
         switch(convierteUri2Int.match(uri)) {
             case INMUEBLES: break;
             case INMUEBLE_ID:
-                //Opción 1
-                // selection = selection + Contrato.TablaJugador._ID + " = "  +
-                //   uri.getLastPathSegment();
-                //Opción 2
                 selection = Contrato.TablaInmuebles._ID + " = ? ";
                 selectionArgs = new String[]{uri.getLastPathSegment()};
                 break;

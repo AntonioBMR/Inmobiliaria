@@ -35,6 +35,9 @@ import java.util.GregorianCalendar;
 
 
 public class Principal extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
+    /*************                                           ************************//////
+    /************************************variables***********************************//////
+    /*************                                          ************************//////
     private ArrayList<Inmueble> inmuebles;
     private ArrayList<File> fotos;
     private AdaptadorCursor ac;
@@ -43,7 +46,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     private Loader loader;
     private GestorInmuebleCP gi;
     private int imgActual;
-
+    /*************                                           ************************//////
+    /************************************onCreate()***********************************//////
+    /*************                                          ************************//////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,7 +157,12 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         lv.setAdapter(ac);
         loader.onContentChanged();
     }
-    /****************METODOS CRUD INTERFACE*****************************/
+
+
+
+    /*************                                                         ************************//////
+    /************************************METODOS CRUD INTERFACE***********************************//////
+    /*************                                                   ************************//////
     private boolean editar(final Inmueble i) {
         LayoutInflater inflater = LayoutInflater.from(this);
         final View vista = inflater.inflate(R.layout.dialogo, null);
@@ -342,7 +352,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
 
     }
 
-
+    /*************                                                         ************************//////
+    /************************************METODOS MENUs ACTIVIDAD***********************************//////
+    /*************                                                   ************************//////
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -462,21 +474,10 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         getMenuInflater().inflate(R.menu.menu_principal, menu);
         return true;
     }
-    /***********************METODOS CONTENT PROVIDER CRUD*******************************/
 
-    public ArrayList<Inmueble> pasaArray(Cursor c){
-        ArrayList<Inmueble> lista=new ArrayList<Inmueble>();
-        Cursor cursor=gi.getCursor();
-        Inmueble in;
-        while (!cursor.isAfterLast()) {
-            in = GestorInmuebleCP.getRow(cursor);
-            lista.add(in);
-            cursor.moveToNext();
-        }
-        return lista;
-    }
-
-    /**************METODOS AUXILIARES**************/
+/*************                                                         ************************//////
+    /*********************************METODOS AUXILIARES**********************************//////
+    /*************                                                   ************************//////
     public Toast tostada(String t) {
         Toast toast =
                 Toast.makeText(getApplicationContext(),
@@ -547,7 +548,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             }
         }
     }
-
+    /*************                                                         ************************//////
+    /*********************************METODOS LOADER**********************************//////
+    /*************                                                   ************************//////
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cursorLoader = new CursorLoader(this,

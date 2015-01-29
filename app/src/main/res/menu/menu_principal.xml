@@ -1,9 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".principal">
-    <item android:id="@+id/anadir" android:title="Añadir"
+    <item android:id="@+id/anadir"
+        android:title="@string/agregar"
         android:orderInCategory="100" android:showAsAction="never" />
-    <item android:id="@+id/ordenaP" android:title="Ordenar por Precio"
+    <item android:id="@+id/usuario"
+        android:title="@string/usuario"
         android:orderInCategory="100" android:showAsAction="never" />
-    <item android:id="@+id/ordenaT" android:title="Ordenar por Tipo"
+    <item android:id="@+id/ordenaP"
+        android:title="@string/ordenaP"
+        android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/ordenaT"
+        android:title="@string/ordenaT"
         android:orderInCategory="100" android:showAsAction="never" />
 </menu>

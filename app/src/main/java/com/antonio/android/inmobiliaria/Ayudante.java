@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class Ayudante  extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "inmobiliaria.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     public Ayudante(Context context) {
         super(context, DATABASE_NAME, null,DATABASE_VERSION);
@@ -22,14 +22,17 @@ public class Ayudante  extends SQLiteOpenHelper {
         sql="create table "+Contrato.TablaInmuebles.TABLA+
                 " ("+ Contrato.TablaInmuebles._ID+
                 " integer primary key autoincrement, "+
+                Contrato.TablaInmuebles.LOCALIDAD+" text, "+
                 Contrato.TablaInmuebles.DIRECCION+" text, "+
                 Contrato.TablaInmuebles.TIPO+" text, "+
-                Contrato.TablaInmuebles.PRECIO+" text)";
+                Contrato.TablaInmuebles.PRECIO+" text, "+
+                Contrato.TablaInmuebles.SUBIDO+" text)";
         db.execSQL(sql);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS " + Contrato.TablaInmuebles.TABLA);
+        onCreate(db);
     }
 
 

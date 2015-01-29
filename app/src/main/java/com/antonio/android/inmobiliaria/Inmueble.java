@@ -8,28 +8,32 @@ import android.os.Parcelable;
  */
 public class Inmueble implements Parcelable,Comparable<Inmueble> {
     private int id;
-    private String direccion;
+    private String localidad,direccion;
     private String tipo;
     private double precio;
+    private String subido="no";
     public static final Parcelable.Creator<Inmueble> CREATOR = new Parcelable.Creator<Inmueble>() {
         @Override
         public Inmueble createFromParcel(Parcel p) {
+            int id=p.readInt();
+            String localidad = p.readString();
             String direccion = p.readString();
             String tipo = p.readString();
             Double precio = p.readDouble();
-            int id=p.readInt();
-            return new Inmueble(id, direccion, tipo, precio);
+            return new Inmueble(id, localidad,direccion, tipo, precio);
         }
         @Override
         public Inmueble[] newArray(int i) {
             return new Inmueble[i];
         }
     };
-    public Inmueble(int id, String direccion, String tipo, double precio) {
+    public Inmueble(int id,String localidad, String direccion, String tipo, double precio) {
         this.id = id;
+        this.localidad=localidad;
         this.direccion = direccion;
         this.tipo = tipo;
         this.precio = precio;
+        this.subido="no";
     }
     public Inmueble( String direccion, String tipo, double precio) {
         this.direccion = direccion;
@@ -78,11 +82,29 @@ public class Inmueble implements Parcelable,Comparable<Inmueble> {
     public String toString() {
         return "Inmueble{" +
                 "id=" + id +
+                ", localidad='" + localidad + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", tipo='" + tipo + '\'' +
                 ", precio=" + precio +
                 '}';
     }
+
+    public String getLocalidad() {
+        return localidad;
+    }
+
+    public void setLocalidad(String localidad) {
+        this.localidad = localidad;
+    }
+
+    public String getSubido() {
+        return subido;
+    }
+
+    public void setSubido(String fecha) {
+        this.subido = fecha;
+    }
+
     @Override
     public boolean equals(Object o) {
         Inmueble i=(Inmueble)o;

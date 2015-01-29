@@ -29,9 +29,12 @@ public class Adaptador extends ArrayAdapter<Inmueble> {
         if(v==null){
             v=i.inflate(resource,null);
         }
+        TextView tvL=(TextView) v.findViewById(R.id.textViewL);
         TextView tvD=(TextView) v.findViewById(R.id.textViewD);
         TextView tvT=(TextView) v.findViewById(R.id.textViewT);
         TextView tvP=(TextView) v.findViewById(R.id.textViewP);
+
+        tvL.setText(lista.get(position).getLocalidad());
         tvD.setText(lista.get(position).getDireccion());
         tvT.setText(lista.get(position).getTipo());
         DecimalFormat df=new DecimalFormat("#,###.00");

@@ -23,23 +23,24 @@ public class Secundaria extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_secundaria);
-        String dir, tip, pr;
+        String dir, tip, pr,loc;
         int id;
         fotos = new ArrayList<File>();
+        loc = getIntent().getStringExtra("loc");
         dir = getIntent().getStringExtra("dir");
         tip = getIntent().getStringExtra("tip");
         pr = getIntent().getStringExtra("pr");
         id = getIntent().getExtras().getInt("id");
-        TextView tv = (TextView) findViewById(R.id.tvDF2);
-        TextView tv1 = (TextView) findViewById(R.id.tvTF2);
-        TextView tv2 = (TextView) findViewById(R.id.tvPF2);
+        TextView tv = (TextView) findViewById(R.id.tvLF2);
+        TextView tv1 = (TextView) findViewById(R.id.tvDF2);
+        TextView tv2 = (TextView) findViewById(R.id.tvTF2);
+        TextView tv3 = (TextView) findViewById(R.id.tvPF2);
         final Fragmento2 fdos = (Fragmento2) getFragmentManager().findFragmentById(R.id.fragment_2);
         ImageView iv = (ImageView) findViewById(R.id.imageView1);
         Button siguiente = (Button) findViewById(R.id.bSiguiente);
         Button atras = (Button) findViewById(R.id.bAtras);
         String nombre = id + "";
         String ruta = Environment.getExternalStorageDirectory() + "/fotosInmobiliaria/";
-        System.out.println(ruta + " ruta");
         imgActual = 0;
         File carpeta = new File(ruta);
         File[] listaFotos = carpeta.listFiles();
@@ -92,14 +93,14 @@ public class Secundaria extends Activity {
                 });
             }
         }else {
-                System.out.println("NO existe file");
                 iv.setImageResource(R.drawable.nofoto);
                 atras.setVisibility(View.INVISIBLE);
                 siguiente.setVisibility(View.INVISIBLE);
             }
-            tv.setText(dir);
-            tv1.setText(tip);
-            tv2.setText(pr);
+            tv.setText(loc);
+            tv1.setText(dir);
+            tv2.setText(tip);
+            tv3.setText(pr);
         }
 
     @Override

@@ -8,12 +8,19 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="65dp">
+        android:layout_height="85dp">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="65dp">
+            android:layout_height="85dp"
+        >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="20dp"
+                android:id="@+id/textViewL"
+                android:textSize="15dp" />
 
             <TextView
                 android:layout_width="fill_parent"

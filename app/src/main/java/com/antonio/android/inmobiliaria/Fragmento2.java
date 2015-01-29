@@ -14,13 +14,15 @@ public class Fragmento2 extends Fragment {
     public Fragmento2() {
     }
 
-    public void setTexto(String texto,String texto1,String texto2){
-        TextView tv=(TextView)v.findViewById(R.id.tvDF2);
+    public void setTexto(String texto,String texto1,String texto2,String texto3){
+        TextView tv=(TextView)v.findViewById(R.id.tvLF2);
         tv.setText(texto);
-        TextView tv1=(TextView)v.findViewById(R.id.tvTF2);
+        TextView tv1=(TextView)v.findViewById(R.id.tvDF2);
         tv1.setText(texto1);
-        TextView tv2=(TextView)v.findViewById(R.id.tvPF2);
+        TextView tv2=(TextView)v.findViewById(R.id.tvTF2);
         tv2.setText(texto2);
+        TextView tv3=(TextView)v.findViewById(R.id.tvPF2);
+        tv3.setText(texto3);
 
     }
 

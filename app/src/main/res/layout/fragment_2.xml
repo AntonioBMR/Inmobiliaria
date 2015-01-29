@@ -50,7 +50,12 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom">
-
+        <TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
+            android:id="@+id/tvLF2"
+            android:layout_gravity="bottom"
+            android:textSize="23dp"
+            android:textAlignment="center"
+            android:gravity="center_vertical|center_horizontal" />
         <TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
             android:id="@+id/tvDF2"
             android:layout_gravity="bottom"

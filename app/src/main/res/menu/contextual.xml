@@ -4,13 +4,16 @@
     tools:context=".Main"
     >
     <item android:id="@+id/borrar"
-        android:title="Borrar"
+        android:title="@string/Borrar"
         android:orderInCategory="100"
         android:showAsAction="never" />
     <item android:id="@+id/editar"
-        android:title="Modificar"
+        android:title="@string/Modificar"
         />
     <item android:id="@+id/foto"
-        android:title="Hacer Foto"
+        android:title="@string/Foto"
+        />
+    <item android:id="@+id/Bfoto"
+        android:title="@string/BFoto"
         />
 </menu>

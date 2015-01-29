@@ -12,9 +12,10 @@ import android.widget.TextView;
  * Created by Antonio on 01/12/2014.
  */
 public class AdaptadorCursor extends CursorAdapter {
-    private Cursor c;
+    private Context contexto;
     public AdaptadorCursor(Context context, Cursor c) {
         super(context, c, true);
+        contexto = context;
     }
 
     @Override
@@ -27,12 +28,24 @@ public class AdaptadorCursor extends CursorAdapter {
     @Override
     public void bindView(View v, Context co, Cursor c) {
         Inmueble in=new Inmueble();
-        in= GestorInmuebles.getRow(c);
+        in= getRow(c);
+        TextView tvL = (TextView) v.findViewById(R.id.textViewL);
         TextView tvD = (TextView) v.findViewById(R.id.textViewD);
         TextView tvT = (TextView) v.findViewById(R.id.textViewT);
         TextView tvP = (TextView) v.findViewById(R.id.textViewP);
+        tvL.setText(in.getLocalidad());
         tvD.setText(in.getDireccion());
         tvT.setText(in.getTipo());
         tvP.setText(in.getPrecio()+" ");
     }
+    public static Inmueble getRow(Cursor c) {
+        Inmueble in = new Inmueble();
+        in.setId(c.getInt(0));
+        in.setLocalidad(c.getString(1));
+        in.setDireccion(c.getString(2));
+        in.setTipo(c.getString(3));
+        in.setPrecio(Double.parseDouble(c.getString(4)));
+        return in;
+    }
+
 }

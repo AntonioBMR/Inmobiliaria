@@ -2,8 +2,13 @@ package com.antonio.android.inmobiliaria;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +25,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,72 +34,52 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 
-public class Principal extends Activity {
+public class Principal extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
     private ArrayList<Inmueble> inmuebles;
     private ArrayList<File> fotos;
-    private GestorInmuebles gi;
     private AdaptadorCursor ac;
-    private Cursor cursor;
     private final int ACTIVIDAD2=1;
     private ListView lv;
+    private Loader loader;
+    private GestorInmuebleCP gi;
     private int imgActual;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        String user = sharedPref.getString("usuario", "AntonioBMR");
+        getLoaderManager().initLoader(0, null, this);
         inmuebles = new ArrayList<Inmueble>();
-        gi=new GestorInmuebles(this);
-        gi.open();
-        inmuebles= (ArrayList<Inmueble>) gi.select();
-        cursor= gi.getCursor();
+        gi = new GestorInmuebleCP(this);
         lv=(ListView)findViewById(R.id.listView);
-        ac=new AdaptadorCursor(this, cursor);
+        ac=new AdaptadorCursor(this, null);
         lv.setAdapter(ac);
+        loader = getLoaderManager().initLoader(0, null, this);
         imgActual = 0;
         final Fragmento2 fdos=(Fragmento2)getFragmentManager().findFragmentById(R.id.fragment_2);
         final boolean horizontal;
         if(fdos!=null && fdos.isInLayout()){
             horizontal=true;
-        }else{horizontal=false;}
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                String[] opc = new String[]{"Borrar", "Modificar", "Hacer Foto"};
-                final int posicion = position;
-                AlertDialog opciones = new AlertDialog.Builder(
-                        Principal.this)
-                        .setTitle("Opciones")
-                        .setItems(opc,
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,
-                                                        int selected) {
-                                        if (selected == 0) {
-                                            borrar(posicion);
-                                        } else if (selected == 1) {
-                                            editar(posicion);
-                                        }else if (selected == 2) {
-                                            hacerFoto(posicion);
-                                        }
-                                    }
-                                }).create();
-                opciones.show();
-                return true;
-            }
-        });
+        }else{
+            horizontal=false;}
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Inmueble im=(Inmueble) lv.getItemAtPosition(position);
+                Cursor cursor = gi.getCursor();
+                cursor.moveToPosition(position);
+                Inmueble im= GestorInmuebleCP.getRow(cursor);
+                cursor.close();
                 if(horizontal){
-                    fdos.setTexto(inmuebles.get(position).getDireccion(),inmuebles.get(position).getTipo(),inmuebles.get(position).getPrecio()+"€");
+                    fdos.setTexto(im.getLocalidad(),im.getDireccion(),im.getTipo(),im.getPrecio()+"€");
                     ImageView iv= (ImageView)findViewById(R.id.imageView1);
+                    iv.setVisibility(View.VISIBLE);
                     fotos=new ArrayList<File>();
                     Button siguiente=(Button)findViewById(R.id.bSiguiente);
                     Button atras=(Button)findViewById(R.id.bAtras);
-                    String nombre=inmuebles.get(position).getId()+"";
+                    String nombre=im.getId()+"";
                     String ruta = Environment.getExternalStorageDirectory() +"/fotosInmobiliaria/";
-                    System.out.println(ruta+" ruta");
                     imgActual=0;
                     File carpeta = new  File(ruta);
                     File[] listaFotos = carpeta.listFiles();
@@ -107,6 +91,7 @@ public class Principal extends Activity {
                         }
                     }
                     if(!fotos.isEmpty()){
+                        iv.setVisibility(View.VISIBLE);
                         if (fotos.size() == 1) {
                             iv.setImageURI(Uri.fromFile(fotos.get(0)));
                             atras.setVisibility(View.INVISIBLE);
@@ -146,45 +131,48 @@ public class Principal extends Activity {
                             });
                         }
                     }else{
+                        iv.setVisibility(View.VISIBLE);
                         iv.setImageResource(R.drawable.nofoto);
-                        System.out.println("NO existe file");
                         atras.setVisibility(View.INVISIBLE);
                         siguiente.setVisibility(View.INVISIBLE);
                     }
                 }else {
                     Intent i=new Intent(Principal.this,Secundaria.class);
                     i.putExtra("id", im.getId());
+                    i.putExtra("loc", im.getLocalidad());
                     i.putExtra("dir", im.getDireccion());
-                    i.putExtra("tip",im.getTipo());
+                    i.putExtra("tip", im.getTipo());
                     i.putExtra("pr",im.getPrecio()+"€");
                     startActivityForResult(i,ACTIVIDAD2);
                 }
             }
         });
-        Adaptador ad=new Adaptador(this,R.layout.detalle,inmuebles);
-        lv.setAdapter(ad);
         registerForContextMenu(lv);
-
+        ac=new AdaptadorCursor(this,null);
+        lv.setAdapter(ac);
+        loader.onContentChanged();
     }
-    private boolean editar(final int index) {
-        Inmueble i=new Inmueble();
-        i=inmuebles.get(index);
+    /****************METODOS CRUD INTERFACE*****************************/
+    private boolean editar(final Inmueble i) {
         LayoutInflater inflater = LayoutInflater.from(this);
         final View vista = inflater.inflate(R.layout.dialogo, null);
-        final EditText et1, et2,et3;
-        String pr,dir,tip;
+        final EditText et,et1, et2,et3;
+        String loc,pr,dir,tip;
+        loc=i.getLocalidad();
         pr=i.getPrecio()+"";
         dir=i.getDireccion();
         tip=i.getTipo();
+        et = (EditText) vista.findViewById(R.id.etLA);
         et1 = (EditText) vista.findViewById(R.id.etDA);
         et2 = (EditText) vista.findViewById(R.id.etTA);
         et3 = (EditText) vista.findViewById(R.id.etPA);
+        et.setText(loc);
         et1.setText(dir);
         et2.setText(tip);
         et3.setText(pr);
         final AlertDialog d = new AlertDialog.Builder(this)
                 .setView(vista)
-                .setTitle("Modificar inmueble")
+                .setTitle(R.string.ModificarIn)
                 .setPositiveButton(android.R.string.ok, null) //Set to null. We override the onclick
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
@@ -197,37 +185,33 @@ public class Principal extends Activity {
                     @Override
                     public void onClick(View view) {
 
-                        if(et1.getText().toString().length() > 0
+                        if(et.getText().toString().length() > 0&&et1.getText().toString().length() > 0
                                 && et3.getText().length() > 0&& et2.getText().length()>0 ) {
                             Double pr = 0.0;
-                            Inmueble i = inmuebles.get(index);
-
                             try {
                                 pr = Double.parseDouble(et3.getText().toString());
                             } catch (Exception e) {
                             }
                             i.setPrecio(pr);
+                            i.setLocalidad(et.getText().toString());
                             i.setDireccion(et1.getText().toString());
                             i.setTipo(et2.getText().toString());
                             gi.update(i);
-                            inmuebles.set(index,i);
-                            Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
-                            ad.notifyDataSetChanged();
-
-                            ListView lv = (ListView) findViewById(R.id.listView);
-                            lv.setAdapter(ad);
-                            tostada("El inmueble de "+i.getDireccion()+" ha sido modificado");
+                            tostada(R.string.elimb+i.getDireccion()+R.string.hasdm);
                             d.dismiss();
                         }
                         // Filtramos que nos este vacios
                         if(et2.getText().toString().length() == 0 ){
-                            tostada("¡Introduzca tipo!");
+                            tostada(getResources().getString(R.string.intT));
                         }
                         if(et3.getText().toString().length() == 0 ){
-                            tostada("¡Introduzca precio!");
+                            tostada(getResources().getString(R.string.intP));
                         }
                         if(et1.getText().toString().length() == 0 ){
-                            tostada("¡Introduzca direccion!");
+                            tostada(getResources().getString(R.string.intD));
+                        }
+                        if(et.getText().toString().length() == 0 ){
+                            tostada(getResources().getString(R.string.intL));
                         }
                     }
                 });
@@ -235,29 +219,40 @@ public class Principal extends Activity {
         });
         d.show();
         lv=(ListView) findViewById(R.id.listView);
-        Adaptador ad=new Adaptador(this,R.layout.detalle,inmuebles);
-        lv.setAdapter(ad);
+        ac=new AdaptadorCursor(this,null);
+        lv.setAdapter(ac);
+        loader.onContentChanged();
         return true;
     }
-//
-    public boolean borrar(final int pos){
-        AlertDialog.Builder dialogo1 = new AlertDialog.Builder(Principal.this);
-        dialogo1.setTitle("Importante");
-        dialogo1.setMessage("¿ Desea borrar el inmueble seleccionado ?");
-        dialogo1.setCancelable(false);
-        dialogo1.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialogo1, int id) {
 
-                gi.delete(inmuebles.get(pos));
-                inmuebles.remove(pos);
-                Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
-                ad.notifyDataSetChanged();
+    private boolean borrar(final int idI){
+        AlertDialog.Builder dialogo1 = new AlertDialog.Builder(Principal.this);
+        dialogo1.setTitle(getResources().getString(R.string.importante));
+        dialogo1.setMessage(getResources().getString(R.string.desBorrar));
+        dialogo1.setCancelable(false);
+        dialogo1.setPositiveButton(getResources().getString(R.string.conf), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogo1, int id) {
+                borraFotos(idI);
+                gi.eliminar(idI);
+                final Fragmento2 fdos=(Fragmento2)getFragmentManager().findFragmentById(R.id.fragment_2);
+                ImageView iv= (ImageView)findViewById(R.id.imageView1);
+                final boolean horizontal;
+                if(fdos!=null && fdos.isInLayout()){
+                    horizontal=true;
+                    fdos.setTexto("","","","");
+                    iv.setVisibility(View.INVISIBLE);
+                }
+                loader.onContentChanged();
+                ac = new AdaptadorCursor(Principal.this, null);
+                ac.notifyDataSetChanged();
                 ListView lv = (ListView) findViewById(R.id.listView);
-                lv.setAdapter(ad);
-                tostada("Inmueble borrado");
+                lv.setAdapter(ac);
+                loader.onContentChanged();
+
+                tostada(getResources().getString(R.string.elimb)+getResources().getString(R.string.hasB));
             }
         });
-        dialogo1.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+        dialogo1.setNegativeButton(getResources().getString(R.string.canc), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogo1, int id) {
                 dialogo1.cancel();
             }
@@ -270,18 +265,20 @@ public class Principal extends Activity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
         final View vista = inflater.inflate(R.layout.dialogo, null);
-        final EditText et1, et2,et3;
+        final EditText et,et1, et2,et3;
+        et = (EditText) vista.findViewById(R.id.etLA);
         et1 = (EditText) vista.findViewById(R.id.etDA);
         et2 = (EditText) vista.findViewById(R.id.etTA);
         et3 = (EditText) vista.findViewById(R.id.etPA);
-        et1.setHint("Introduzca direccion");
-        et2.setHint("Introduzca tipo");
-        et3.setHint("Introduzca precio");
+        et.setHint(getResources().getString(R.string.intL));
+        et1.setHint(getResources().getString(R.string.intD));
+        et2.setHint(getResources().getString(R.string.intT));
+        et3.setHint(getResources().getString(R.string.intP));
 
         //dialogo
         final AlertDialog d = new AlertDialog.Builder(this)
                 .setView(vista)
-                .setTitle("Añadir inmueble")
+                .setTitle(getResources().getString(R.string.agregarI))
                 .setPositiveButton(android.R.string.ok, null) //Set to null. We override the onclick
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
@@ -293,7 +290,7 @@ public class Principal extends Activity {
 
                     @Override
                     public void onClick(View view) {
-                        if(et1.getText().toString().length() > 0
+                        if(et1.getText().toString().length() > 0&& et1.getText().toString().length() > 0
                                 && et3.getText().length() > 0&& et2.getText().length()>0) {
                             Double pr = 0.0;
 
@@ -303,28 +300,33 @@ public class Principal extends Activity {
                             } catch (Exception e) {
                             }
                             i.setPrecio(pr);
+                            i.setLocalidad(et.getText().toString());
                             i.setDireccion(et1.getText().toString());
                             i.setTipo(et2.getText().toString());
 //                      añadimos jugados y mostramos
-                            gi.insert(i);
-                            inmuebles.add(i);
-                            Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
-                            ad.notifyDataSetChanged();
+                            gi.insertar(i);
+                            gi.select();
+                            ac = new AdaptadorCursor(Principal.this,null);
+                            ac.notifyDataSetChanged();
 
                             ListView lv = (ListView) findViewById(R.id.listView);
-                            lv.setAdapter(ad);
-                            tostada("El inmueble de "+i.getDireccion()+" ha sido añadido");
+                            lv.setAdapter(ac);
+                            loader.onContentChanged();
+
+                            tostada(getResources().getString(R.string.elimb)+i.getDireccion()+getResources().getString(R.string.hasA));
                             d.dismiss();
                         }
                         // Filtramos que nos este vacios
                         if(et2.getText().toString().length() == 0 ){
-                            tostada("¡Introduzca tipo!");
+                            tostada(getResources().getString(R.string.intT));
                         }
                         if(et3.getText().toString().length() == 0 ){
-                            tostada("¡Precio incorrecto!");
+                            tostada(getResources().getString(R.string.intP));
                         }
                         if(et1.getText().toString().length() == 0 ){
-                            tostada("¡Introduzca direccion!");
+                            tostada(getResources().getString(R.string.intD));
+                        }if(et.getText().toString().length() == 0 ){
+                            tostada(getResources().getString(R.string.intL));
                         }
                     }
                 });
@@ -332,27 +334,79 @@ public class Principal extends Activity {
         });
         d.show();
         lv=(ListView) findViewById(R.id.listView);
-        Adaptador ad=new Adaptador(this,R.layout.detalle,inmuebles);
-        lv.setAdapter(ad);
+        ac=new AdaptadorCursor(this,null);
+        lv.setAdapter(ac);
+        loader.onContentChanged();
+
         return true;
 
     }
 
-    public boolean isRepetido(Inmueble i){
-        for(int j=0;j<inmuebles.size();j++){
-            if(inmuebles.get(j).compareTo(i)==0){
-                return true;
-            }
-        }
-        return false;
-
-    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.menu_principal, menu);
+        getMenuInflater().inflate(R.menu.contextual, menu);
+
     }
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int id=item.getItemId();
+        AdapterView.AdapterContextMenuInfo info= (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        int index= info.position;
+        Cursor cursor = gi.getCursor();
+        cursor.moveToPosition(index);
+        Inmueble inmueble = GestorInmuebleCP.getRow(cursor);
+        cursor.close();
+        if (id == R.id.borrar) {
+            borrar(inmueble.getId());
+
+               return true;
+        }else if (id == R.id.editar) {
+            editar(inmueble);
+            final Fragmento2 fdos=(Fragmento2)getFragmentManager().findFragmentById(R.id.fragment_2);
+            ImageView iv=(ImageView)findViewById(R.id.imageView1);
+            final boolean horizontal;
+            if(fdos!=null && fdos.isInLayout()){
+                horizontal=true;
+                fdos.setTexto("","","","");
+                iv.setVisibility(View.INVISIBLE);
+
+            }
+            loader.onContentChanged();
+            return true;
+        }
+        else if (id == R.id.foto) {
+            hacerFoto(inmueble);
+            final Fragmento2 fdos=(Fragmento2)getFragmentManager().findFragmentById(R.id.fragment_2);
+            ImageView iv=(ImageView)findViewById(R.id.imageView1);
+            final boolean horizontal;
+            if(fdos!=null && fdos.isInLayout()){
+                horizontal=true;
+                fdos.setTexto("","","","");
+                iv.setVisibility(View.INVISIBLE);
+            }
+            loader.onContentChanged();
+            return true;
+        }
+        else if (id == R.id.Bfoto) {
+            borraFotos(inmueble.getId());
+            final Fragmento2 fdos=(Fragmento2)getFragmentManager().findFragmentById(R.id.fragment_2);
+            ImageView iv=(ImageView)findViewById(R.id.imageView1);
+            final boolean horizontal;
+            if(fdos!=null && fdos.isInLayout()){
+                horizontal=true;
+                fdos.setTexto("","","","");
+                iv.setVisibility(View.INVISIBLE);
+
+            }
+            loader.onContentChanged();
+
+            return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -360,19 +414,44 @@ public class Principal extends Activity {
             agregar();
             return true;
         }
+        if (id == R.id.usuario) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle(getResources().getString(R.string.usuario));
+            LayoutInflater inflater = LayoutInflater.from(this);
+            final View v = inflater.inflate(R.layout.dialogo_usuario, null);
+            alert.setView(v);
+            alert.setPositiveButton(android.R.string.ok,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            EditText ett = (EditText) v.findViewById(R.id.et_usuario);
+                            String txt = ett.getText().toString();
+                            txt=txt.trim();
+                            if(txt.length()>0) {
+                                SharedPreferences sharedPref = Principal.this.getPreferences(Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString("usuario", txt);
+                                editor.commit();
+                            }
+                        }
+                    });
+            alert.setNegativeButton(android.R.string.cancel,null);
+            alert.show();
+        }
         if (id == R.id.ordenaP) {
-            Collections.sort(inmuebles, new OrdenaPrecios());
-            Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
+            Cursor cursor=gi.getCursor();
+            //Collections.sort(inmuebles, new OrdenaPrecios());
+            ac = new AdaptadorCursor(Principal.this,cursor);
             ListView lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(ad);
+            lv.setAdapter(ac);
+            loader.onContentChanged();
             return true;
-
         }
         if (id == R.id.ordenaT) {
             Collections.sort(inmuebles, new OrdenaTipos());
-            Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
+            ac = new AdaptadorCursor(Principal.this, null);
             ListView lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(ad);
+            lv.setAdapter(ac);
+            loader.onContentChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -383,7 +462,21 @@ public class Principal extends Activity {
         getMenuInflater().inflate(R.menu.menu_principal, menu);
         return true;
     }
+    /***********************METODOS CONTENT PROVIDER CRUD*******************************/
 
+    public ArrayList<Inmueble> pasaArray(Cursor c){
+        ArrayList<Inmueble> lista=new ArrayList<Inmueble>();
+        Cursor cursor=gi.getCursor();
+        Inmueble in;
+        while (!cursor.isAfterLast()) {
+            in = GestorInmuebleCP.getRow(cursor);
+            lista.add(in);
+            cursor.moveToNext();
+        }
+        return lista;
+    }
+
+    /**************METODOS AUXILIARES**************/
     public Toast tostada(String t) {
         Toast toast =
                 Toast.makeText(getApplicationContext(),
@@ -391,6 +484,7 @@ public class Principal extends Activity {
         toast.show();
         return toast;
     }
+    /*
     @Override
     protected void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
@@ -402,30 +496,32 @@ public class Principal extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
         inmuebles= savedInstanceState.getParcelableArrayList("Inmuebles");
-        Adaptador ad = new Adaptador(this, R.layout.detalle, inmuebles);
+        ac= new AdaptadorCursor(this,null);
         lv = (ListView) findViewById(R.id.listView);
-        lv.setAdapter(ad);
+        lv.setAdapter(ac);
+        loader.onContentChanged();
+
     }
-    @Override
+    */
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ( requestCode == 2&&resultCode == Activity.RESULT_OK ){
             inmuebles=data.getParcelableArrayListExtra("inmuebles");
-            Adaptador ad = new Adaptador(Principal.this, R.layout.detalle, inmuebles);
-            ad.notifyDataSetChanged();
+            ac = new AdaptadorCursor(Principal.this,null);
+            ac.notifyDataSetChanged();
             lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(ad);
+            lv.setAdapter(ac);
         }
         if (requestCode == 3 && resultCode == RESULT_OK) {
 
         }
-    }
-
-    private boolean hacerFoto(final int index){
+    }*/
+    private boolean hacerFoto(final Inmueble index){
         Calendar cal = new GregorianCalendar();
         Date date = cal.getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         String fecha = df.format(date);
-        int id=inmuebles.get(index).getId();
+        int id=(index).getId();
         String nombre=id+"_"+fecha;
         Intent cameraIntent = new Intent(
                 android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
@@ -438,6 +534,35 @@ public class Principal extends Activity {
         startActivityForResult(cameraIntent, ACTIVIDAD2);
         return true;
     }
+    public void borraFotos(final int id){
+        String ruta = Environment.getExternalStorageDirectory() +"/fotosInmobiliaria/";
+        File carpeta = new  File(ruta);
+        String[] listaFotos = carpeta.list();
+        for (int i = 0; i < listaFotos.length; i++) {
+            String idFoto=listaFotos[i];
+            String idF=listaFotos[i].split("_")[0];
+            if(idF.equals(id+"")){
+                File f= new File(ruta,idFoto);
+                f.delete();
+            }
+        }
+    }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        CursorLoader cursorLoader = new CursorLoader(this,
+                Contrato.TablaInmuebles.CONTENT_URI, null, null, null, Contrato.TablaInmuebles._ID);
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ac.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        ac.swapCursor(null);
+    }
 }
 

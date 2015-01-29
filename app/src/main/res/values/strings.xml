@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Inmobiliaria</string>
+    <string name="localidad">localidad</string>
+    <string name="direccion">direccion</string>
+    <string name="tipo">tipo</string>
+    <string name="precio">precio</string>
     <string name="Borrar">Modificar</string>
     <string name="Foto">Hacer Foto</string>
+    <string name="opciones">opciones</string>
+    <string name="BFoto">Borrar Foto</string>
     <string name="Modificar">Modificar</string>
-    <string name="agregar">Añadir</string>
+    <string name="ModificarIn">Modificar inmueble</string>
+    <string name="agregar">Agregar</string>
+    <string name="agregarI">Agregar inmueble</string>
     <string name="ordenaT">Ordendar por tipos</string>
     <string name="ordenaP">Ordendar por precios</string>
     <string name="atras">anterior</string>
     <string name="siguiente">siguiente</string>
+    <string name="usuario">usuario</string>
     <string name="detalleInmbueble">Detalle inmbueble</string>
+    <string name="elimb">El inmueble </string>
+    <string name="hasdm"> ha sido modificado </string>
+    <string name="hasB"> ha sido borrado </string>
+    <string name="hasA"> ha sido agregado </string>
+    <string name="intT">Introduzca tipo </string>
+    <string name="intP">Introduzca precio </string>
+    <string name="intL">Introduzca localidad </string>
+    <string name="intD">Introduzca direccion </string>
+    <string name="importante">¡Importante! </string>
+    <string name="desBorrar">¿Desea borrar el inmueble seleccionado? </string>
+    <string name="conf">confirmar </string>
+    <string name="canc">cancelar </string>
+
 </resources>

@@ -585,6 +585,9 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     public void onLoaderReset(Loader<Cursor> loader) {
         ac.swapCursor(null);
     }
+    /*************                                                         ************************//////
+    /***************************HILO PARA SUBIR INMUebles Y FOTOS**********************************//////
+    /*************                                                         ************************//////
     public class GestorPost extends AsyncTask<ArrayList<Inmueble>,Void,String> {
         String urlBase = "http://"+"192.168.1.110:8080"+"/WebInmobiliaria/" ;
         String urlInmueble="control?target=inmueble&op=insert&action=opandroid";

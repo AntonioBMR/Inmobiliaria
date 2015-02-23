@@ -6,6 +6,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.util.ArrayList;
+
 /**
  * Created by Antonio on 29/01/2015.
  */
@@ -76,7 +78,38 @@ public class GestorInmuebleCP {
                 condicion,
                 parametros,
                 orden);
+
     }
+    public ArrayList<Inmueble> pasaArrayl() {
+       // getCursor().close();
+        Uri uri = Contrato.TablaInmuebles.CONTENT_URI;
+        String[] proyeccion = null;
+        String condicion = null;
+        String[] parametros = null;
+        String orden = null;
+        Cursor cursor= cr.query(
+                uri,
+                proyeccion,
+                condicion,
+                parametros,
+                orden);
+        ArrayList<Inmueble>al=new ArrayList<Inmueble>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            Inmueble i=new Inmueble();
+            i.setId(cursor.getInt(0));
+            i.setLocalidad(cursor.getString(1));
+            i.setDireccion(cursor.getString(2));
+            i.setTipo(cursor.getString(3));
+            i.setPrecio(Double.parseDouble(cursor.getString(4)));
+            i.setSubido(cursor.getString(5));
+            al.add(i);
+            System.out.println("inmuebles "+i.toString());
+        }
+        cursor.close();
+        return al;
+
+    }
+
     public static Inmueble getRow(Cursor c) {
         Inmueble objeto = new Inmueble();
         System.out.println("cursor ");
@@ -85,6 +118,7 @@ public class GestorInmuebleCP {
         objeto.setDireccion(c.getString(2));
         objeto.setTipo(c.getString(3));
         objeto.setPrecio(Double.parseDouble(c.getString(4)));
+        objeto.setSubido(c.getString(5));
         //objeto.setSubido(c.getString(6));
         return objeto;
     }

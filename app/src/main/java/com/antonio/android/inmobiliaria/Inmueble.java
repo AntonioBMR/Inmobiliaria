@@ -11,7 +11,7 @@ public class Inmueble implements Parcelable,Comparable<Inmueble> {
     private String localidad,direccion;
     private String tipo;
     private double precio;
-    private String subido="no";
+    private String subido;
     public static final Parcelable.Creator<Inmueble> CREATOR = new Parcelable.Creator<Inmueble>() {
         @Override
         public Inmueble createFromParcel(Parcel p) {
@@ -39,6 +39,8 @@ public class Inmueble implements Parcelable,Comparable<Inmueble> {
         this.direccion = direccion;
         this.tipo = tipo;
         this.precio = precio;
+        this.subido="no";
+
     }
     @Override
     public int hashCode() {
@@ -85,6 +87,7 @@ public class Inmueble implements Parcelable,Comparable<Inmueble> {
                 ", localidad='" + localidad + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", tipo='" + tipo + '\'' +
+                ", subido='" + subido + '\'' +
                 ", precio=" + precio +
                 '}';
     }
@@ -104,7 +107,14 @@ public class Inmueble implements Parcelable,Comparable<Inmueble> {
     public void setSubido(String fecha) {
         this.subido = fecha;
     }
-
+    public String getPost(String usuario){
+        String s = "localidad="+this.localidad+"&" +
+                "direccion="+this.direccion+"&" +
+                "tipo=" + this.tipo+"&" +
+                "precio=" + this.precio+"&" +
+                "usuario=" + usuario;
+        return s;
+    }
     @Override
     public boolean equals(Object o) {
         Inmueble i=(Inmueble)o;

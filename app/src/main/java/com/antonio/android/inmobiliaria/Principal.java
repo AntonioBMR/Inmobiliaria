@@ -11,6 +11,7 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -26,7 +27,21 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,6 +61,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     private Loader loader;
     private GestorInmuebleCP gi;
     private int imgActual;
+    String usuario;
     /*************                                           ************************//////
     /************************************onCreate()***********************************//////
     /*************                                          ************************//////
@@ -54,10 +70,11 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        String user = sharedPref.getString("usuario", "AntonioBMR");
+        usuario = sharedPref.getString("usuario", "antonio");
         getLoaderManager().initLoader(0, null, this);
         inmuebles = new ArrayList<Inmueble>();
         gi = new GestorInmuebleCP(this);
+        inmuebles=gi.pasaArrayl();
         lv=(ListView)findViewById(R.id.listView);
         ac=new AdaptadorCursor(this, null);
         lv.setAdapter(ac);
@@ -232,6 +249,10 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         loader.onContentChanged();
         return true;
     }
+    private void editarSubido( Inmueble i) {
+        i.setSubido("subido");
+        gi.update(i);
+    }
 
     private boolean borrar(final int idI){
         AlertDialog.Builder dialogo1 = new AlertDialog.Builder(Principal.this);
@@ -311,9 +332,12 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
                             i.setLocalidad(et.getText().toString());
                             i.setDireccion(et1.getText().toString());
                             i.setTipo(et2.getText().toString());
+                            i.setSubido("no");
 //                      añadimos jugados y mostramos
                             gi.insertar(i);
                             gi.select();
+                            inmuebles=new ArrayList();
+                            inmuebles=gi.pasaArrayl();
                             ac = new AdaptadorCursor(Principal.this,null);
                             ac.notifyDataSetChanged();
 
@@ -433,14 +457,15 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             alert.setPositiveButton(android.R.string.ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            EditText ett = (EditText) v.findViewById(R.id.et_usuario);
-                            String txt = ett.getText().toString();
-                            txt=txt.trim();
-                            if(txt.length()>0) {
+                            EditText etu = (EditText) v.findViewById(R.id.et_usuario);
+                            String usu = etu.getText().toString();
+
+                            if(usu.length()>0) {
                                 SharedPreferences sharedPref = Principal.this.getPreferences(Context.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = sharedPref.edit();
-                                editor.putString("usuario", txt);
+                                editor.putString("usuario", usu);
                                 editor.commit();
+                                usuario=usu;
                             }
                         }
                     });
@@ -449,7 +474,6 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         }
         if (id == R.id.ordenaP) {
             Cursor cursor=gi.getCursorPre();
-            //Collections.sort(inmuebles, new OrdenaPrecios());
             ac = new AdaptadorCursor(Principal.this,cursor);
             ListView lv = (ListView) findViewById(R.id.listView);
             lv.setAdapter(ac);
@@ -463,6 +487,17 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             ListView lv = (ListView) findViewById(R.id.listView);
             lv.setAdapter(ac);
             loader.onContentChanged();
+            return true;
+        }
+        if (id == R.id.subir) {
+            ArrayList<Inmueble> inmueblesasubir=new ArrayList<Inmueble>();
+            for(int i=0;i<inmuebles.size();i++){
+                if(inmuebles.get(i).getSubido().equals("no")){
+                    inmueblesasubir.add(inmuebles.get(i));
+                }
+            }
+            GestorPost gp =new GestorPost();
+            gp.execute(inmueblesasubir);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -484,38 +519,7 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
         toast.show();
         return toast;
     }
-    /*
-    @Override
-    protected void onSaveInstanceState(Bundle outState){
-        super.onSaveInstanceState(outState);
-        lv=(ListView)findViewById(R.id.listView);
-        outState.putParcelableArrayList("Inmuebles", inmuebles);
 
-    }
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState){
-        super.onRestoreInstanceState(savedInstanceState);
-        inmuebles= savedInstanceState.getParcelableArrayList("Inmuebles");
-        ac= new AdaptadorCursor(this,null);
-        lv = (ListView) findViewById(R.id.listView);
-        lv.setAdapter(ac);
-        loader.onContentChanged();
-
-    }
-    */
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ( requestCode == 2&&resultCode == Activity.RESULT_OK ){
-            inmuebles=data.getParcelableArrayListExtra("inmuebles");
-            ac = new AdaptadorCursor(Principal.this,null);
-            ac.notifyDataSetChanged();
-            lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(ac);
-        }
-        if (requestCode == 3 && resultCode == RESULT_OK) {
-
-        }
-    }*/
     private boolean hacerFoto(final Inmueble index){
         Calendar cal = new GregorianCalendar();
         Date date = cal.getTime();
@@ -548,6 +552,20 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
             }
         }
     }
+    public ArrayList<String> fotosInmueble(int id){
+        ArrayList<String>rutasFotos=new ArrayList<String>();
+        String ruta = Environment.getExternalStorageDirectory() +"/fotosInmobiliaria/";
+        File carpeta = new  File(ruta);
+        String[] listaFotos = carpeta.list();
+        for (int i = 0; i < listaFotos.length; i++) {
+            String idF=listaFotos[i].split("_")[0];
+            if(idF.equals(id+"")){
+                System.out.println("ruta"+ruta+listaFotos[i].toString());
+                rutasFotos.add(ruta+listaFotos[i].toString());
+            }
+        }
+        return rutasFotos;
+    }
     /*************                                                         ************************//////
     /*********************************METODOS LOADER**********************************//////
     /*************                                                   ************************//////
@@ -567,5 +585,99 @@ public class Principal extends Activity implements LoaderManager.LoaderCallbacks
     public void onLoaderReset(Loader<Cursor> loader) {
         ac.swapCursor(null);
     }
+    public class GestorPost extends AsyncTask<ArrayList<Inmueble>,Void,String> {
+        String urlBase = "http://"+"192.168.1.110:8080"+"/WebInmobiliaria/" ;
+        String urlInmueble="control?target=inmueble&op=insert&action=opandroid";
+        String urlFotos = "controlfotos?target=foto&op=insert&action=op";
+
+        public String post(String web, String inmueble){
+            String txt="";
+            try {
+                URL url = new URL(web);
+                URLConnection conexion = url.openConnection();
+                conexion.setDoOutput(true);
+                OutputStreamWriter out = new OutputStreamWriter(conexion.getOutputStream());
+                out.write(inmueble);
+                out.close();
+                BufferedReader in = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+                String linea;
+                while ((linea = in.readLine()) != null) {
+                    txt += linea + "\n";
+                }
+                System.out.println(txt+" pasa");
+                in.close();
+            }catch (Exception e){
+
+            }
+            return txt;
+        }
+        private String postFoto(String urlPeticion, String nombreInmueble, String nombreArchivo, int id) {
+            String resultado="";
+            int status=0;
+            try {
+                URL url = new URL(urlPeticion);
+                HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
+                conexion.setDoOutput(true);
+                conexion.setRequestMethod("POST");
+                FileBody fileBody = new FileBody(new File(nombreArchivo));
+                MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.STRICT);
+                multipartEntity.addPart(nombreInmueble, fileBody);
+                multipartEntity.addPart("id", new StringBody(""+id));
+                conexion.setRequestProperty("Content-Type", multipartEntity.getContentType().getValue());
+                OutputStream out = conexion.getOutputStream();
+                try {
+                    multipartEntity.writeTo(out);
+                } catch(Exception ex){
+                    return ex.toString();
+                } finally {
+                    out.close();
+                }
+                BufferedReader in = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
+                String decodedString;
+                while ((decodedString = in.readLine()) != null) {
+                    resultado+=decodedString+"\n";
+                }
+                in.close();
+                status = conexion.getResponseCode();
+            } catch (MalformedURLException ex) {
+                return ex.toString();
+            } catch (IOException ex) {
+                return ex.toString();
+            }
+            return resultado+"  "+status;
+        }
+        @Override
+        protected String doInBackground(ArrayList<Inmueble>... s) {
+            String id = "";
+            for(Inmueble i : s[0]){
+                String direccion = i.getDireccion();
+                String tipo = i.getTipo();
+                String localidad = i.getLocalidad();
+                String precio = i.getPrecio()+"";
+                usuario="antonio";
+                id = post(urlBase + urlInmueble,
+                        "direccion=" + direccion + "&localidad=" + localidad + "&tipo=" + tipo + "&usuario=" + usuario + "&precio=" + precio + "");
+                id = id.trim();
+                i.setSubido("subido");
+                gi.update(i);
+                int idNum = Integer.parseInt(id);
+                System.out.println("pasa id "+idNum);
+                ArrayList<String> fotos = fotosInmueble(i.getId());
+                for(String foto: fotos) {
+                    postFoto(urlBase+urlFotos, "archivo", foto, idNum);
+                }
+            }
+            return id;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            System.out.println(" pasa doinbac" + s);
+            tostada("inmuebles subidos");
+            }
+
+    }
+
+
 }
 

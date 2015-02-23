@@ -12,4 +12,7 @@
     <item android:id="@+id/ordenaT"
         android:title="@string/ordenaT"
         android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/subir"
+        android:title="subir"
+        android:orderInCategory="100" android:showAsAction="never" />
 </menu>
